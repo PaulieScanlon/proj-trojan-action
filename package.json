@@ -1,0 +1,12 @@
+{
+  "name": "proj-trojan-action",
+  "version": "1.0.0",
+  "description": "pg_dump/restore across DBs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
