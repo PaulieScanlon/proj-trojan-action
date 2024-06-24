@@ -1,6 +1,7 @@
 {
   "name": "proj-trojan-action",
   "version": "1.0.0",
+  "type": "module",
   "description": "pg_dump/restore across DBs",
   "main": "index.js",
   "scripts": {
