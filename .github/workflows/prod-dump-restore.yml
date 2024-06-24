@@ -17,7 +17,7 @@ jobs:
       NODE_VERSION: '20.x' # Specify Node.js version 20 for all steps
 
     steps:
-      - name: Test SSL Cert env var
+      - name: Decode SSL Cert
         run: |
           echo "${{ secrets.SSL_CERT_BASE64 }}" | base64 --decode > us-east-1-bundle.pem
 
@@ -49,7 +49,7 @@ jobs:
           name: database-backup
           path: '${{ github.workspace }}'
 
-      - name: Get artifact size
+      - name: Calculate and Save Artifact Size
         id: artifact-size
         run: |
           artifact_path="${{ github.workspace }}/backup-${{ env.TIMESTAMP }}.dump"
@@ -78,9 +78,11 @@ jobs:
 
       - name: Debug artifact size
         run: |
-          echo "Debugging artifact size: ${{ env.ARTIFACT_SIZE_BYTES }}"
+          artifact_size="${{ env.ARTIFACT_SIZE_BYTES }}"
+          echo "Debugging artifact size: $artifact_size"
 
       - name: Run the JavaScript script
-        env:
-          ARTIFACT_SIZE_BYTES: ${{ env.ARTIFACT_SIZE_BYTES }}
-        run: node src/index.js
+        run: |
+          artifact_size="${{ env.ARTIFACT_SIZE_BYTES }}"
+          echo "Running script with artifact size: $artifact_size"
+          node src/index.js
