@@ -40,7 +40,7 @@ jobs:
       - name: Restore database to development
         run: |
           TIMESTAMP="${{ env.TIMESTAMP }}"
-          /usr/lib/postgresql/${{ env.PG_VERSION }}/bin/pg_restore -U postgres -d ${{ env.DEV_DATABASE_URL }} -c "${TIMESTAMP}.dump"
+          /usr/lib/postgresql/${{ env.PG_VERSION }}/bin/pg_restore -U postgres -d ${{ env.DEV_DATABASE_URL }} -c "${{ github.workspace }}/${TIMESTAMP}.dump"
 
   post-to-slack-webhook:
     runs-on: ubuntu-latest
