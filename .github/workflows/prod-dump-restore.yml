@@ -16,6 +16,9 @@ jobs:
       SSL_CERT_BASE64: ${{ secrets.SSL_CERT_BASE64 }}
       NODE_VERSION: '20.x' # Specify Node.js version 20 for all steps
 
+    outputs:
+      artifact_size_bytes: ${{ steps.calculate-artifact-size.outputs.bytes }}
+
     steps:
       - name: Decode SSL Cert
         run: |
@@ -50,12 +53,11 @@ jobs:
           path: '${{ github.workspace }}'
 
       - name: Calculate and Save Artifact Size
-        id: artifact-size
+        id: calculate-artifact-size
         run: |
           artifact_path="${{ github.workspace }}/backup-${{ env.TIMESTAMP }}.dump"
           artifact_size=$(stat -c '%s' "$artifact_path")
-          echo "ARTIFACT_SIZE_BYTES=$artifact_size" >> $GITHUB_ENV
-          echo "Artifact size calculated: $artifact_size bytes"
+          echo "bytes=$artifact_size" >> $GITHUB_OUTPUT
 
       - name: List downloaded files
         run: |
@@ -67,7 +69,7 @@ jobs:
 
   post-to-slack-webhook:
     runs-on: ubuntu-latest
-    needs: db-backup-and-restore
+    needs: db-backup-and-restore # Ensures this job runs after db-backup-and-restore
 
     steps:
       - name: Checkout repository
@@ -78,11 +80,10 @@ jobs:
 
       - name: Debug artifact size
         run: |
-          artifact_size="${{ env.ARTIFACT_SIZE_BYTES }}"
-          echo "Debugging artifact size: $artifact_size"
+          echo "Artifact size in bytes: ${{ needs.db-backup-and-restore.outputs.artifact_size_bytes }}"
 
       - name: Run the JavaScript script
+        env:
+          ARTIFACT_SIZE_BYTES: ${{ needs.db-backup-and-restore.outputs.artifact_size_bytes }}
         run: |
-          artifact_size="${{ env.ARTIFACT_SIZE_BYTES }}"
-          echo "Running script with artifact size: $artifact_size"
           node src/index.js
