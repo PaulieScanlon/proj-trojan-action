@@ -49,6 +49,13 @@ jobs:
           name: database-backup
           path: '${{ github.workspace }}'
 
+      - name: Get artifact size
+        id: artifact-size
+        run: |
+          artifact_path="${{ github.workspace }}/backup-${{ env.TIMESTAMP }}.dump"
+          artifact_size=$(stat -c '%s' "$artifact_path")
+          echo "ARTIFACT_SIZE_BYTES=$artifact_size" >> $GITHUB_ENV
+
       - name: List downloaded files
         run: |
           ls -lh "${{ github.workspace }}"
@@ -69,4 +76,6 @@ jobs:
         run: npm ci
 
       - name: Run the JavaScript script
+        env:
+          ARTIFACT_SIZE_BYTES: ${{ steps.artifact-size.outputs.artifact_size }}
         run: node src/index.js
