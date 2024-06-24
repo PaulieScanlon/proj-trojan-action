@@ -14,6 +14,7 @@ jobs:
       DEV_DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }} # Development database
       PG_VERSION: '16'
       SSL_CERT_BASE64: ${{ secrets.SSL_CERT_BASE64 }}
+      NODE_VERSION: '20.x' # Specify Node.js version 20 for all steps
 
     steps:
       - name: Test SSL Cert env var
@@ -58,7 +59,7 @@ jobs:
 
   post-to-slack-webhook:
     runs-on: ubuntu-latest
-    needs: db-backup-and-restore # This ensures this job runs after db-backup-and-restore
+    needs: db-backup-and-restore
 
     steps:
       - name: Checkout repository
