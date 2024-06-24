@@ -75,6 +75,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug artifact size
+        run: |
+          echo "Artifact size: ${{ steps.artifact-size.outputs.artifact_size }} bytes"
+
       - name: Run the JavaScript script
         env:
           ARTIFACT_SIZE_BYTES: ${{ steps.artifact-size.outputs.artifact_size }}
