@@ -13,8 +13,13 @@ jobs:
       PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }} # Production or primary database
       DEV_DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }} # Development database
       PG_VERSION: '16'
+      SSL_CERT_BASE64: ${{ secrets.SSL_CERT_BASE64 }}
 
     steps:
+      - name: Test SSL Cert env var
+        run: |
+          echo "${{ secrets.SSL_CERT_BASE64 }}" | base64 --decode > us-east-1-bundle.pem
+
       - name: Install PostgreSQL
         run: |
           sudo apt update
