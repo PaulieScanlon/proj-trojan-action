@@ -77,9 +77,9 @@ jobs:
 
       - name: Debug artifact size
         run: |
-          echo "Artifact size: ${{ steps.artifact-size.outputs.artifact_size }} bytes"
+          echo "Artifact size: ${{ steps.artifact-size.outputs.ARTIFACT_SIZE_BYTES }} bytes"
 
       - name: Run the JavaScript script
         env:
-          ARTIFACT_SIZE_BYTES: ${{ steps.artifact-size.outputs.artifact_size }}
+          ARTIFACT_SIZE_BYTES: ${{ steps.artifact-size.outputs.ARTIFACT_SIZE_BYTES }}
         run: node src/index.js
