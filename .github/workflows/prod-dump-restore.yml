@@ -55,6 +55,7 @@ jobs:
           artifact_path="${{ github.workspace }}/backup-${{ env.TIMESTAMP }}.dump"
           artifact_size=$(stat -c '%s' "$artifact_path")
           echo "ARTIFACT_SIZE_BYTES=$artifact_size" >> $GITHUB_ENV
+          echo "Artifact size calculated: $artifact_size bytes"
 
       - name: List downloaded files
         run: |
@@ -77,7 +78,7 @@ jobs:
 
       - name: Debug artifact size
         run: |
-          echo "Artifact size: ${{ steps.artifact-size.outputs.ARTIFACT_SIZE_BYTES }} bytes"
+          echo "Steps output: ${{ steps.artifact-size.outputs.ARTIFACT_SIZE_BYTES }}"
 
       - name: Run the JavaScript script
         env:
