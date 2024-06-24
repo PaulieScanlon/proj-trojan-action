@@ -12,8 +12,8 @@ jobs:
     env:
       PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }} # Production or primary database
       DEV_DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }} # Development database
-      PG_VERSION: '16'
       SSL_CERT_BASE64: ${{ secrets.SSL_CERT_BASE64 }}
+      PG_VERSION: '16'
       NODE_VERSION: '20.x' # Specify Node.js version 20 for all steps
 
     outputs:
@@ -85,5 +85,6 @@ jobs:
       - name: Run the JavaScript script
         env:
           ARTIFACT_SIZE_BYTES: ${{ needs.db-backup-and-restore.outputs.artifact_size_bytes }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           node src/index.js
