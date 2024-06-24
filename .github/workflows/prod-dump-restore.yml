@@ -32,15 +32,27 @@ jobs:
         run: |
           echo "TIMESTAMP=$(date +%d-%B-%Y@%H:%M:%S)" >> $GITHUB_ENV
 
-      - name: Run pg_dump to create a backup
+      - name: Dump from RDS
         run: |
           TIMESTAMP="${{ env.TIMESTAMP }}"
-          /usr/lib/postgresql/${{ env.PG_VERSION }}/bin/pg_dump ${{ env.PROD_DATABASE_URL }} -F c -f "${TIMESTAMP}.dump"
+          /usr/lib/postgresql/${{ env.PG_VERSION }}/bin/pg_dump "${{ env.PROD_DATABASE_URL }}" -Fc -f "${{ github.workspace }}/backup-${TIMESTAMP}.dump"
 
-      - name: Restore database to development
+      - name: Upload backup file
+        uses: actions/upload-artifact@v2
+        with:
+          name: database-backup
+          path: '${{ github.workspace }}/backup-${TIMESTAMP}.dump'
+
+      - name: Download backup file
+        uses: actions/download-artifact@v2
+        with:
+          name: database-backup
+          path: '${{ github.workspace }}'
+
+      - name: Restore to Neon
         run: |
           TIMESTAMP="${{ env.TIMESTAMP }}"
-          /usr/lib/postgresql/${{ env.PG_VERSION }}/bin/pg_restore -U postgres -d ${{ env.DEV_DATABASE_URL }} -c "${{ github.workspace }}/${TIMESTAMP}.dump"
+          /usr/lib/postgresql/${{ env.PG_VERSION }}/bin/pg_restore -U postgres -d "${{ env.DEV_DATABASE_URL }}" "${{ github.workspace }}/backup-${TIMESTAMP}.dump"
 
   post-to-slack-webhook:
     runs-on: ubuntu-latest
