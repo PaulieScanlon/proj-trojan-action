@@ -30,7 +30,7 @@ jobs:
       - name: Get timestamp
         id: timestamp
         run: |
-          echo "TIMESTAMP=$(date +%d-%B-%Y@%H:%M:%S)" >> $GITHUB_ENV
+          echo "TIMESTAMP=$(date +%d-%B-%Y_%H-%M-%S)" >> $GITHUB_ENV
 
       - name: Dump from RDS
         run: |
