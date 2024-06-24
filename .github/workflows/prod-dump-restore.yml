@@ -54,7 +54,7 @@ jobs:
 
       - name: Restore to Neon
         run: |
-          /usr/lib/postgresql/${{ env.PG_VERSION }}/bin/pg_restore -d "${{ env.DEV_DATABASE_URL }}" "${{ github.workspace }}/backup-${{ env.TIMESTAMP }}.dump"
+          /usr/lib/postgresql/${{ env.PG_VERSION }}/bin/pg_restore --no-owner -d "${{ env.DEV_DATABASE_URL }}" "${{ github.workspace }}/backup-${{ env.TIMESTAMP }}.dump"
 
   post-to-slack-webhook:
     runs-on: ubuntu-latest
