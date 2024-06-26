@@ -4,6 +4,10 @@ dotenv.config();
 const init = async () => {
   const bytes = parseInt(process.env.ARTIFACT_SIZE_BYTES, 10);
   const kilobytes = (bytes / 1024).toFixed(2);
+  const megabytes = (bytes / (1024 * 1024)).toFixed(2);
+  const gigabytes = (bytes / (1024 * 1024 * 1024)).toFixed(2);
+  const gibibytes = (bytes / (1024 * 1024 * 1024)).toFixed(2);
+
   const date = new Intl.DateTimeFormat('en-US', {
     dateStyle: 'full',
     timeStyle: 'short',
@@ -21,7 +25,7 @@ const init = async () => {
             type: 'header',
             text: {
               type: 'plain_text',
-              text: 'RDS Prod to Neon',
+              text: '☝️ A new Neon Twin is available!',
               emoji: true,
             },
           },
@@ -32,8 +36,17 @@ const init = async () => {
             type: 'section',
             text: {
               type: 'plain_text',
-              text: `${kilobytes} KB restored: ${date}`,
+              text: `Latest Twin created: ${date}`,
             },
+          },
+          {
+            type: 'context',
+            elements: [
+              {
+                type: 'mrkdwn',
+                text: `• Kilobytes: ${kilobytes} KB\n• Megabytes: ${megabytes} MB\n• Gigabytes: ${gigabytes} GB\n• Gibibytes: ${gibibytes} GiB`,
+              },
+            ],
           },
         ],
       }),
