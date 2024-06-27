@@ -17,7 +17,7 @@ jobs:
       NODE_VERSION: '20.x' # Specify Node.js version 20 for all steps
 
     outputs:
-      artifact_size_bytes: ${{ steps.calculate-artifact-size.outputs.bytes }}
+      database_size: ${{ steps.query-db-size.outputs.size }}
 
     steps:
       - name: Decode SSL Cert
@@ -52,12 +52,14 @@ jobs:
           name: database-backup
           path: '${{ github.workspace }}'
 
-      - name: Calculate and Save Artifact Size
-        id: calculate-artifact-size
+      - name: Query DB Size
+        id: query-db-size
         run: |
-          artifact_path="${{ github.workspace }}/backup-${{ env.TIMESTAMP }}.dump"
-          artifact_size=$(stat -c '%s' "$artifact_path")
-          echo "bytes=$artifact_size" >> $GITHUB_OUTPUT
+          db_size=$(/usr/lib/postgresql/${{ env.PG_VERSION }}/bin/psql "${{ env.PROD_DATABASE_URL }}" -t -c "SELECT pg_database_size(current_database());")
+
+          echo "Database size query result: $db_size"
+
+          echo "size=$db_size" >> $GITHUB_OUTPUT
 
       - name: List downloaded files
         run: |
@@ -72,7 +74,7 @@ jobs:
     needs: db-backup-and-restore # Ensures this job runs after db-backup-and-restore
 
     env:
-      ARTIFACT_SIZE_BYTES: ${{ needs.db-backup-and-restore.outputs.artifact_size_bytes }}
+      DATABASE_SIZE: ${{ needs.db-backup-and-restore.outputs.database_size }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
@@ -81,10 +83,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Debug artifact size
-        run: |
-          echo "Artifact size in bytes: ${{ needs.db-backup-and-restore.outputs.artifact_size_bytes }}"
 
       - name: Run the JavaScript script
         run: |
