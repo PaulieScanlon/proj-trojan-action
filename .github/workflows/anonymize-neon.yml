@@ -1,0 +1,50 @@
+name: Anonymize Neon PII Data
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  anonymize-data:
+    runs-on: ubuntu-latest
+
+    env:
+      DEV_DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }} # Development database
+      PG_VERSION: '16' # Specify the PostgreSQL version to install
+      NODE_VERSION: '20.x' # Specify Node.js version 20 for all steps
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install PostgreSQL and Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y postgresql-common
+          yes '' | sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+          sudo apt install -y postgresql-${PG_VERSION} wget libpq-dev nodejs pgxnclient postgresql-server-dev-all
+
+          # Install postgresql-anonymizer using PGXN
+          sudo pgxn install postgresql_anonymizer
+
+      - name: Install pgcrypto Extension
+        run: |
+          /usr/lib/postgresql/${PG_VERSION}/bin/psql "${DEV_DATABASE_URL}" -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
+
+      - name: Drop Existing anon Extension
+        run: |
+          /usr/lib/postgresql/${PG_VERSION}/bin/psql "${DEV_DATABASE_URL}" -c "DROP EXTENSION IF EXISTS anon CASCADE;"
+
+      - name: Drop Existing anon Schema if Present
+        run: |
+          /usr/lib/postgresql/${PG_VERSION}/bin/psql "${DEV_DATABASE_URL}" -c "DROP SCHEMA IF EXISTS anon CASCADE;"
+
+      - name: Install anon Extension in Custom Schema
+        run: |
+          /usr/lib/postgresql/${PG_VERSION}/bin/psql "${DEV_DATABASE_URL}" -c "CREATE SCHEMA IF NOT EXISTS custom_anon;"
+          /usr/lib/postgresql/${PG_VERSION}/bin/psql "${DEV_DATABASE_URL}" -c "CREATE EXTENSION anon WITH SCHEMA custom_anon CASCADE;"
+
+      - name: Anonymize PII Data
+        run: |
+          /usr/lib/postgresql/${PG_VERSION}/bin/psql "${DEV_DATABASE_URL}" -c "SELECT custom_anon.anonymize('public.users');"
