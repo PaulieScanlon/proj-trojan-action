@@ -11,7 +11,7 @@ jobs:
 
     env:
       A: 1
-      B: 2 # force failure/success: !=1 for failure, 1 for success
+      B: 1 # force failure/success: !=1 for failure, 1 for success
 
     steps:
       - name: A/B Check

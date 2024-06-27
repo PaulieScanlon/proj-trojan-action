@@ -1,5 +1,5 @@
-const init = async () => {
-  console.log('failure.js');
+const sendFailureNotification = async () => {
+  console.log('// send failure notification');
 };
 
-init();
+sendFailureNotification();

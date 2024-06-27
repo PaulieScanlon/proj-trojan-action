@@ -1,5 +1,5 @@
-const init = async () => {
-  console.log('success.js');
+const sendSuccessNotification = async () => {
+  console.log('// send success notification');
 };
 
-init();
+sendSuccessNotification();
