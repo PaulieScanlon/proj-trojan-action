@@ -3,6 +3,10 @@ dotenv.config();
 
 const init = async () => {
   const bytes = parseInt(process.env.DATABASE_SIZE_IN_BYTES, 10);
+  const jobStatus = process.env.JOB_STATUS;
+
+  console.log('jobStatus: ', jobStatus);
+
   const kilobytes = (bytes / 1024).toFixed(2);
   const megabytes = (bytes / (1024 * 1024)).toFixed(2);
   const gigabytes = (bytes / (1024 * 1024 * 1024)).toFixed(2);
@@ -13,6 +17,57 @@ const init = async () => {
     timeStyle: 'short',
   }).format(new Date());
 
+  const failure = [
+    {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: '⚠️ A Neon Twin failed',
+        emoji: true,
+      },
+    },
+    {
+      type: 'divider',
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'plain_text',
+        text: `Latest Twin failed: ${date}`,
+      },
+    },
+  ];
+
+  const success = [
+    {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: '☝️ A new Neon Twin is available!',
+        emoji: true,
+      },
+    },
+    {
+      type: 'divider',
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'plain_text',
+        text: `Latest Twin created: ${date}`,
+      },
+    },
+    {
+      type: 'context',
+      elements: [
+        {
+          type: 'mrkdwn',
+          text: `• Kilobytes: ${kilobytes} KB\n• Megabytes: ${megabytes} MB\n• Gigabytes: ${gigabytes} GB\n• Gibibytes: ${gibibytes} GiB`,
+        },
+      ],
+    },
+  ];
+
   try {
     fetch(process.env.SLACK_WEBHOOK_URL, {
       method: 'POST',
@@ -20,35 +75,7 @@ const init = async () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        blocks: [
-          {
-            type: 'header',
-            text: {
-              type: 'plain_text',
-              text: '☝️ A new Neon Twin is available',
-              emoji: true,
-            },
-          },
-          {
-            type: 'divider',
-          },
-          {
-            type: 'section',
-            text: {
-              type: 'plain_text',
-              text: `Latest Twin created: ${date}`,
-            },
-          },
-          {
-            type: 'context',
-            elements: [
-              {
-                type: 'mrkdwn',
-                text: `• Kilobytes: ${kilobytes} KB\n• Megabytes: ${megabytes} MB\n• Gigabytes: ${gigabytes} GB\n• Gibibytes: ${gibibytes} GiB`,
-              },
-            ],
-          },
-        ],
+        blocks: jobStatus === 'failure' ? failure : success,
       }),
     });
   } catch (error) {

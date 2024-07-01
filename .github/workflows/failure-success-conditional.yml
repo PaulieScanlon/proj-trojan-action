@@ -1,0 +1,48 @@
+name: failure / success conditional
+
+on:
+  workflow_dispatch:
+
+env:
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  NODE_VERSION: '20.x'
+
+jobs:
+  dump-and-restore:
+    runs-on: ubuntu-latest
+
+    env:
+      A: 1
+      B: 1 # force failure/success: !=1 for failure, 1 for success
+
+    steps:
+      - name: A/B Check
+        if: ${{ env.A != env.B }}
+        run: exit 1
+
+  post-to-slack:
+    runs-on: ubuntu-latest
+    needs:
+      - dump-and-restore
+    if: always()
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Post failure message to Slack
+        if: ${{ needs['dump-and-restore'].result == 'failure' }}
+        env:
+          JOB_STATUS: 'failure'
+        run: |
+          node src/index.js
+
+      - name: Post success message to Slack
+        if: ${{ needs['dump-and-restore'].result == 'success' }}
+        env:
+          JOB_STATUS: 'success'
+        run: |
+          node src/index.js
