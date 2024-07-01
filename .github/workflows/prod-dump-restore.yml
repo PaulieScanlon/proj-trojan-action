@@ -39,7 +39,7 @@ jobs:
       - dump-and-restore
 
     outputs:
-      database_size: ${{ steps.query-db-size.outputs.size }}
+      bytes: ${{ steps.query-db-size.outputs.bytes }}
 
     steps:
       - name: Install PostgreSQL
@@ -52,7 +52,7 @@ jobs:
         id: query-db-size
         run: |
           db_size=$(/usr/lib/postgresql/${{ env.PG_VERSION }}/bin/psql "${{ env.PROD_DATABASE_URL }}" -t -c "SELECT pg_database_size(current_database());")
-          echo "size=$db_size" >> $GITHUB_OUTPUT
+          echo "bytes=$db_size" >> $GITHUB_OUTPUT
 
   post-to-slack:
     runs-on: ubuntu-latest
@@ -61,7 +61,7 @@ jobs:
       - query-db-size
 
     env:
-      DATABASE_SIZE: ${{ needs.query-db-size.outputs.database_size }}
+      DATABASE_SIZE_IN_BYTES: ${{ needs.query-db-size.outputs.bytes }}
 
     steps:
       - name: Checkout repository

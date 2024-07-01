@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const init = async () => {
-  const bytes = parseInt(process.env.DATABASE_SIZE, 10);
+  const bytes = parseInt(process.env.DATABASE_SIZE_IN_BYTES, 10);
   const kilobytes = (bytes / 1024).toFixed(2);
   const megabytes = (bytes / (1024 * 1024)).toFixed(2);
   const gigabytes = (bytes / (1024 * 1024 * 1024)).toFixed(2);
