@@ -51,8 +51,7 @@ jobs:
       - name: Query DB Size
         id: query-db-size
         run: |
-          db_size=$(/usr/lib/postgresql/${{ env.PG_VERSION }}/bin/psql "${{ env.PROD_DATABASE_URL }}" -t -c "SELECT pg_database_size(current_database());")
-          echo "bytes=$db_size" >> $GITHUB_OUTPUT
+          echo "bytes=$(/usr/lib/postgresql/${{ env.PG_VERSION }}/bin/psql "${{ env.PROD_DATABASE_URL }}" -t -c "SELECT pg_database_size(current_database());")" >> $GITHUB_OUTPUT
 
   post-to-slack:
     runs-on: ubuntu-latest
