@@ -59,6 +59,7 @@ jobs:
     needs:
       - dump-and-restore
       - query-db-size
+    if: always()
 
     env:
       DATABASE_SIZE_IN_BYTES: ${{ needs.query-db-size.outputs.bytes }}
@@ -70,6 +71,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run the JavaScript script
+      - name: Post failure message to Slack
+        if: ${{ needs['dump-and-restore'].result == 'failure' }}
+        env:
+          JOB_STATUS: 'failure'
+        run: |
+          node src/index.js
+
+      - name: Post success message to Slack
+        if: ${{ needs['dump-and-restore'].result == 'success' }}
+        env:
+          JOB_STATUS: 'success'
         run: |
           node src/index.js
