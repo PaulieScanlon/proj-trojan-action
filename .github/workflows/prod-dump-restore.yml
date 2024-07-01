@@ -16,9 +16,6 @@ jobs:
       PG_VERSION: '16'
       NODE_VERSION: '20.x' # Specify Node.js version 20 for all steps
 
-    outputs:
-      database_size: ${{ steps.query-db-size.outputs.size }}
-
     steps:
       - name: Decode SSL Cert
         run: |
@@ -51,6 +48,29 @@ jobs:
           name: database-backup
           path: '${{ github.workspace }}'
 
+      - name: Restore to Neon
+        run: |
+          /usr/lib/postgresql/${{ env.PG_VERSION }}/bin/pg_restore --clean --no-owner --no-acl --if-exists -d "${{ env.DEV_DATABASE_URL }}" "${{ github.workspace }}/backup-${{ env.TIMESTAMP }}.dump"
+
+  query-db-size:
+    runs-on: ubuntu-latest
+    needs:
+      - dump-and-restore
+
+    outputs:
+      database_size: ${{ steps.query-db-size.outputs.size }}
+
+    env:
+      PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+      PG_VERSION: '16'
+
+    steps:
+      - name: Install PostgreSQL
+        run: |
+          sudo apt update
+          yes '' | sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+          sudo apt install -y postgresql-${{ env.PG_VERSION }}
+
       - name: Query DB Size
         id: query-db-size
         run: |
@@ -59,16 +79,14 @@ jobs:
           echo "Database size query result: $db_size"
           echo "size=$db_size" >> $GITHUB_OUTPUT
 
-      - name: Restore to Neon
-        run: |
-          /usr/lib/postgresql/${{ env.PG_VERSION }}/bin/pg_restore --clean --no-owner --no-acl --if-exists -d "${{ env.DEV_DATABASE_URL }}" "${{ github.workspace }}/backup-${{ env.TIMESTAMP }}.dump"
-
   post-to-slack-webhook:
     runs-on: ubuntu-latest
-    needs: dump-and-restore # Ensures this job runs after dump-and-restore
+    needs:
+      - dump-and-restore
+      - query-db-size
 
     env:
-      DATABASE_SIZE: ${{ needs.dump-and-restore.outputs.database_size }}
+      DATABASE_SIZE: ${{ needs.query-db-size.outputs.database_size }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
