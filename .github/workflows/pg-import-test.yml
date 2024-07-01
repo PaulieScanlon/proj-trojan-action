@@ -17,16 +17,11 @@ jobs:
         run: |
           echo "${{ secrets.SSL_CERT_BASE64 }}" | base64 --decode > us-east-1-bundle.pem
 
-      - name: Print environment variables for debugging
-        run: |
-          echo "PROD_DATABASE_URL: ${{env.PROD_DATABASE_URL }}"
-          echo "DEV_DATABASE_URL: ${{ env.DEV_DATABASE_URL }}"
-
       - name: Dump and restore using pg-import
         run: |
           npx @neondatabase/pg-import@latest \
             --silent false \
             --accept-all false \
-            --backup-file-path \ ${{ github.workspace }}/backup.bk
+            --backup-file-path ${{ github.workspace }}/backup.bk \
             --source="${{ env.PROD_DATABASE_URL }}" \
             --destination="${{ env.DEV_DATABASE_URL }}"
