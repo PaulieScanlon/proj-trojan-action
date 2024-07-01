@@ -1,4 +1,4 @@
-name: Dump and Restore | PostgreSQL
+name: Create Neon Twin
 
 on:
   schedule:
