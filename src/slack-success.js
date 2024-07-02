@@ -7,8 +7,9 @@ const init = async () => {
     timeStyle: 'short',
   }).format(new Date());
 
-  const bytes = parseInt(process.env.DB_QUERY, 10) || 0;
+  const bytes = parseInt(process.env.DATABASE_SIZE, 10) || 0;
   const gigabytes = (bytes / (1024 * 1024 * 1024)).toFixed(2);
+  const name = process.env.DATABASE_NAME;
 
   try {
     fetch(process.env.SLACK_WEBHOOK_URL, {
@@ -41,7 +42,7 @@ const init = async () => {
             elements: [
               {
                 type: 'mrkdwn',
-                text: `• ${gigabytes} GB twinned from production`,
+                text: `• ${gigabytes} GB twinned from ${name}`,
               },
             ],
           },
