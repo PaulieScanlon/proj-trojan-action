@@ -33,13 +33,13 @@ jobs:
           /usr/lib/postgresql/${{ env.PG_VERSION }}/bin/pg_dump "${{ env.PROD_DATABASE_URL }}" -Fc -f "${{ github.workspace }}/prod-dump-file.dump"
           /usr/lib/postgresql/${{ env.PG_VERSION }}/bin/pg_restore --clean --no-owner --no-acl --if-exists -d "${{ env.DEV_DATABASE_URL }}" "${{ github.workspace }}/prod-dump-file.dump"
 
-  query-db-size:
+  db-query:
     runs-on: ubuntu-latest
     needs:
       - dump-and-restore
 
     outputs:
-      bytes: ${{ steps.query-db-size.outputs.bytes }}
+      result: ${{ steps.db-query.outputs.result }}
 
     steps:
       - name: Install PostgreSQL
@@ -48,20 +48,20 @@ jobs:
           yes '' | sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
           sudo apt install -y postgresql-${{ env.PG_VERSION }}
 
-      - name: Query DB Size
-        id: query-db-size
+      - name: Database Query
+        id: db-query
         run: |
-          echo "bytes=$(/usr/lib/postgresql/${{ env.PG_VERSION }}/bin/psql "${{ env.PROD_DATABASE_URL }}" -t -c "SELECT pg_database_size(current_database());")" >> $GITHUB_OUTPUT
+          echo "result=$(/usr/lib/postgresql/${{ env.PG_VERSION }}/bin/psql "${{ env.PROD_DATABASE_URL }}" -t -c "SELECT pg_database_size(current_database());")" >> $GITHUB_OUTPUT
 
   post-to-slack:
     runs-on: ubuntu-latest
     needs:
       - dump-and-restore
-      - query-db-size
+      - db-query
     if: always()
 
     env:
-      DATABASE_SIZE_IN_BYTES: ${{ needs.query-db-size.outputs.bytes }}
+      DB_QUERY: ${{ needs.db-query.outputs.result }}
 
     steps:
       - name: Checkout repository

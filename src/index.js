@@ -9,11 +9,8 @@ const init = async () => {
     timeStyle: 'short',
   }).format(new Date());
 
-  const bytes = parseInt(process.env.DATABASE_SIZE_IN_BYTES, 10) || 0;
-  const kilobytes = (bytes / 1024).toFixed(2);
-  const megabytes = (bytes / (1024 * 1024)).toFixed(2);
+  const bytes = parseInt(process.env.DB_QUERY, 10) || 0;
   const gigabytes = (bytes / (1024 * 1024 * 1024)).toFixed(2);
-  const gibibytes = (bytes / (1024 * 1024 * 1024)).toFixed(2);
 
   const messages = {
     success: [
@@ -40,7 +37,7 @@ const init = async () => {
         elements: [
           {
             type: 'mrkdwn',
-            text: `• Kilobytes: ${kilobytes} KB\n• Megabytes: ${megabytes} MB\n• Gigabytes: ${gigabytes} GB\n• Gibibytes: ${gibibytes} GiB`,
+            text: `• ${gigabytes} GB twinned from production`,
           },
         ],
       },
