@@ -14,8 +14,22 @@ env:
   NODE_VERSION: '20.x'
 
 jobs:
+  capture-start-time:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Capture start time
+        id: capture-start-time
+        run: |
+          echo "start_time=$(date --utc +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_OUTPUT
+
+    outputs:
+      start_time: ${{ steps.capture-start-time.outputs.start_time }}
+
   dump-and-restore:
     runs-on: ubuntu-latest
+    needs:
+      - 'capture-start-time'
 
     steps:
       - name: Decode SSL Cert
@@ -56,16 +70,33 @@ jobs:
       database_size: ${{ steps.db-query.outputs.database_size }}
       database_name: ${{ steps.db-query.outputs.database_name }}
 
+  capture-end-time:
+    runs-on: ubuntu-latest
+    needs:
+      - db-query
+
+    steps:
+      - name: Capture end time
+        id: capture-end-time
+        run: |
+          echo "end_time=$(date --utc +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_OUTPUT
+
+    outputs:
+      end_time: ${{ steps.capture-end-time.outputs.end_time }}
+
   post-to-slack-success:
     runs-on: ubuntu-latest
     needs:
-      - dump-and-restore
+      - capture-start-time
       - db-query
+      - capture-end-time
     if: ${{ success() }}
 
     env:
       DATABASE_SIZE: ${{ needs.db-query.outputs.database_size }}
       DATABASE_NAME: ${{ needs.db-query.outputs.database_name }}
+      JOB_START_TIME: ${{ needs.capture-start-time.outputs.start_time }}
+      JOB_END_TIME: ${{ needs.capture-end-time.outputs.end_time }}
 
     steps:
       - name: Checkout repository
