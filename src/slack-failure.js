@@ -1,12 +1,9 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-const init = async () => {
-  const date = new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'full',
-    timeStyle: 'short',
-  }).format(new Date());
+import formatDate from './format-date.js';
 
+const init = async () => {
   try {
     fetch(process.env.SLACK_WEBHOOK_URL, {
       method: 'POST',
@@ -30,7 +27,7 @@ const init = async () => {
             type: 'section',
             text: {
               type: 'plain_text',
-              text: `Latest Twin failed: ${date}`,
+              text: `Latest Twin failed: ${formatDate(new Date()).date}`,
             },
           },
         ],
