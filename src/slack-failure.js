@@ -27,7 +27,7 @@ const init = async () => {
             type: 'section',
             text: {
               type: 'plain_text',
-              text: `Latest Twin failed: ${formatDate(new Date()).date}`,
+              text: `Failed: ${formatDate(new Date()).date}`,
             },
           },
         ],
