@@ -1,4 +1,4 @@
-name: Create Neon Twin
+name: Create Neon Twin (default)
 
 on:
   schedule:
