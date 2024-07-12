@@ -13,5 +13,7 @@
   "devDependencies": {
     "dotenv": "^16.4.5"
   },
-  "dependencies": {}
+  "dependencies": {
+    "octokit": "^4.0.2"
+  }
 }
