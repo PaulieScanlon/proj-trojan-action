@@ -39,7 +39,6 @@ jobs:
           sudo apt install -y postgresql-${{ env.PG_VERSION }}
 
       - name: Database Query
-        id: db-query
         run: |
           echo "database_size=$(/usr/lib/postgresql/${{ env.PG_VERSION }}/bin/psql "${{ env.PROD_DATABASE_URL }}" -t -c "SELECT pg_database_size(current_database());")" >> $GITHUB_OUTPUT
 
