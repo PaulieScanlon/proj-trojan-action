@@ -2,7 +2,7 @@ name: Create Neon Twin (SSL)
 
 on:
   # schedule:
-  # - cron: '0 0 * * *' # Runs at midnight ET (us-east-1)
+  #   - cron: '0 0 * * *' # Runs at midnight ET (us-east-1)
   workflow_dispatch:
 
 env:
